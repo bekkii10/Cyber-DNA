@@ -230,37 +230,11 @@ Alerts must be highly explainable to support the academic thesis. An alert in th
 
 ## 13. 7-Student Responsibility Mapping
 
-To ensure parallel development, the team is divided into distinct, non-blocking workstreams:
-
-```mermaid
-flowchart TD
-    S1["Student 1: AD Lab & Simulation<br>(Builds network, writes attack scripts)"]
-    S2["Student 2: Collection & Ingestion<br>(Configures Winlogbeat, creates FastAPI ingestion)"]
-    S3["Student 3: Data Schema & Storage<br>(Postgres design, normalizes raw logs)"]
-    S4["Student 4: Rule Engine<br>(Writes deterministic detection rules)"]
-    S5["Student 5: Behavioral Engine<br>(Pandas feature extraction, Scikit-learn model)"]
-    S6["Student 6: Risk Scorer & API<br>(Correlates S4+S5, serves API to frontend)"]
-    S7["Student 7: Frontend UI<br>(React dashboard, alert investigation views)"]
-
-    S1 -.->|Provides Logs to| S2
-    S2 -.->|Hands raw JSON to| S3
-    S3 -.->|Provides DB views for| S4
-    S3 -.->|Provides DB views for| S5
-    S4 -.->|Feeds results to| S6
-    S5 -.->|Feeds results to| S6
-    S6 -.->|Provides REST API to| S7
-```
+*(To be added for future)*
 
 ## 14. Development Phases
 
-*   **Phase 1 (Week 1-2):** AD Lab built. Background noise generation script running.
-*   **Phase 2 (Week 3):** Winlogbeat installed. Logs successfully landing in PostgreSQL via FastAPI.
-*   **Phase 3 (Week 4):** Database schema finalized. Normalizer extracting key fields.
-*   **Phase 4 (Week 5-6):** Basic Rule Engine active. Simple React frontend displaying raw normalized logs.
-*   **Phase 5 (Week 7-8):** Feature extraction running. Baseline established on background noise.
-*   **Phase 6 (Week 9-10):** Behavioral anomaly detection active. Risk Scoring engine merging Rules + ML.
-*   **Phase 7 (Week 11):** Launch simulated attacks in Lab. Tune thresholds.
-*   **Phase 8 (Week 12):** Academic Evaluation (Calculating Precision/Recall). Polish UI.
+*(To be added for future)*
 
 ## 15. Testing & Evaluation Strategy
 
