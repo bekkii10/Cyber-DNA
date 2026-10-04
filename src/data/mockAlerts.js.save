@@ -1,0 +1,77 @@
+export const mockAlerts = [
+  {
+    id: "ALT-901",
+    timestamp: "2026-09-27T14:07:55Z",
+    event_id: "4728",
+    username: "j.chen",
+    domain: "CORP.LOCAL",
+    source_ip: "192.168.1.10",
+    computer: "DC01",
+    alert_type: "Privilege Escalation",
+    severity: "Critical",
+    risk_score: 92,
+    description:
+      "User was added to Domain Admins outside the normal change window.",
+    source: "Windows Security Event 4728",
+    explanation:
+      "The account's current activity differs strongly from its normal privilege baseline.",
+    seen: false
+  },
+
+  {
+    id: "ALT-902",
+    timestamp: "2026-09-27T14:06:42Z",
+    event_id: "4625",
+    username: "kwilson",
+    domain: "CORP.LOCAL",
+    source_ip: "192.168.1.15",
+    computer: "WS-DEV04",
+    alert_type: "Password Spray",
+    severity: "High",
+    risk_score: 86,
+    description:
+      "Many authentication failures were observed across different accounts from one source.",
+    source: "Windows Security Events 4625",
+    explanation:
+      "The pattern is consistent with distributed password guessing.",
+    seen: false
+  },
+
+  {
+    id: "ALT-903",
+    timestamp: "2026-09-27T14:02:44Z",
+    event_id: "4624",
+    username: "mchen",
+    domain: "CORP.LOCAL",
+    source_ip: "10.0.0.14",
+    computer: "DC-PROD01",
+    alert_type: "ML Behavioral Anomaly",
+    severity: "High",
+    risk_score: 79,
+    description:
+      "Sensitive domain-controller access occurred outside the user's baseline hours.",
+    source: "4624 + behavioral model",
+    explanation:
+      "The behavioral model found an unusual combination of time, host and activity.",
+    seen: false
+  },
+
+  {
+    id: "ALT-904",
+    timestamp: "2026-09-27T13:51:02Z",
+    event_id: "4624",
+    username: "svc.monitor",
+    domain: "CORP.LOCAL",
+    source_ip: "10.10.5.19",
+    computer: "WS-ADMIN01",
+    alert_type: "Unusual Logon Time",
+    severity: "Medium",
+    risk_score: 61,
+    description:
+      "Interactive logon occurred outside the normal activity window.",
+    source: "Windows Security Event 4624",
+    explanation:
+      "The event is unusual but does not by itself prove malicious activity.",
+    seen: true
+  }
+];
