@@ -1,17 +1,24 @@
 from pydantic_settings import BaseSettings
+from typing import Optional
+from urllib.parse import quote_plus
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Cyber-DNA Platform API"
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = "/api"
     
-    POSTGRES_SERVER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
+    POSTGRES_SERVER: Optional[str] = None
+    POSTGRES_USER: Optional[str] = None
+    POSTGRES_PASSWORD: Optional[str] = None
+    POSTGRES_DB: Optional[str] = None
+    
+    DATABASE_URI: str = "sqlite:///./cyberdna.db"
     
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+        if self.POSTGRES_SERVER and self.POSTGRES_USER and self.POSTGRES_DB:
+            encoded_password = quote_plus(self.POSTGRES_PASSWORD) if self.POSTGRES_PASSWORD else ""
+            return f"postgresql://{self.POSTGRES_USER}:{encoded_password}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+        return self.DATABASE_URI
 
     class Config:
         env_file = ".env"

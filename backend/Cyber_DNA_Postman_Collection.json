@@ -1,0 +1,119 @@
+{
+	"info": {
+		"name": "Cyber-DNA Platform API",
+		"description": "Postman collection for testing the updated Cyber-DNA backend endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health & Dashboard",
+			"item": [
+				{
+					"name": "Healthcheck",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/health"
+					}
+				},
+				{
+					"name": "Dashboard Overview",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/dashboard/overview"
+					}
+				}
+			]
+		},
+		{
+			"name": "Collector Ingestion",
+			"item": [
+				{
+					"name": "Ingest Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"timestamp\": \"2026-10-04T06:40:12Z\",\n  \"event_id\": 4625,\n  \"username\": \"sifen.melaku\",\n  \"domain\": \"corp.local\",\n  \"logon_type\": 3,\n  \"source_ip\": \"192.168.56.102\",\n  \"computer\": \"WIN-CLIENT01\",\n  \"record_id\": 12015,\n  \"result\": \"FAILURE\",\n  \"action\": \"Failed logon\",\n  \"event_details\": {}\n}"
+						},
+						"url": "http://127.0.0.1:8000/api/collector/events"
+					}
+				},
+				{
+					"name": "Collector Status",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/collector/status"
+					}
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "Get Events",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/events?page=1&limit=50"
+					}
+				}
+			]
+		},
+		{
+			"name": "Alerts & Incidents",
+			"item": [
+				{
+					"name": "Get Alerts",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/alerts?page=1&limit=50"
+					}
+				},
+				{
+					"name": "Get Incidents",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/incidents"
+					}
+				}
+			]
+		},
+		{
+			"name": "Entities",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/users"
+					}
+				},
+				{
+					"name": "Get Hosts",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/hosts"
+					}
+				}
+			]
+		},
+		{
+			"name": "Rules",
+			"item": [
+				{
+					"name": "Get Rules",
+					"request": {
+						"method": "GET",
+						"url": "http://127.0.0.1:8000/api/rules"
+					}
+				}
+			]
+		}
+	]
+}

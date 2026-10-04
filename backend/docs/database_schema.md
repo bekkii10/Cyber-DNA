@@ -4,110 +4,149 @@
 
 ```mermaid
 erDiagram
-    entities ||--o{ baselines : "has"
-    entities ||--o{ alerts : "triggers"
-    events_raw ||--o{ events_normalized : "is_normalized_to"
+    users ||--o{ user_computer : "uses"
+    computers ||--o{ user_computer : "is_used_by"
+    users ||--o{ sessions : "has"
+    computers ||--o{ sessions : "hosts"
+    users ||--o{ ml_analysis : "analyzed_in"
+    computers ||--o{ ml_analysis : "analyzed_in"
+    computers ||--o{ events : "generates"
+    detection_rules ||--o{ alerts : "triggers"
+    alerts ||--|{ alert_events : "contains"
+    events ||--|{ alert_events : "included_in"
 
-    events_raw {
+    users {
         int id PK
-        datetime timestamp
-        json raw_json
-    }
-
-    events_normalized {
-        int id PK
-        datetime timestamp
-        string event_type
-        string user_name
-        string computer_name
-        string source_ip
-        string status
-        int raw_event_id FK
-    }
-
-    entities {
-        int id PK
-        string entity_type
-        string name
-        boolean is_privileged
+        string username
+        string display_name
+        string domain
         string department
+        string role
+        string status
+        datetime created_at
     }
 
-    baselines {
+    computers {
         int id PK
-        int entity_id FK
-        string feature_name
-        float mean_value
-        float std_dev
+        string hostname
+        string ip_address
+        string domain
+        string operating_system
+        string department
+        string status
+        datetime last_seen
+    }
+
+    events {
+        int id PK
+        datetime timestamp
+        int event_id
+        string username
+        int computer_id FK
+        string domain
+        string source_ip
+        int logon_type
+        int record_id
+        string channel
+        string provider
+        json raw_event
+        datetime created_at
     }
 
     alerts {
         int id PK
-        string alert_id
-        int entity_id FK
-        float risk_score
-        string severity
-        json reasons_json
         datetime timestamp
+        string alert_type
+        string severity
+        string username
+        int computer_id FK
+        string source_ip
+        string description
+        string status
+        int detection_rule FK
+        datetime created_at
+    }
+
+    alert_events {
+        int alert_id FK
+        int event_id FK
+    }
+
+    detection_rules {
+        int id PK
+        string name
+        string description
+        json event_ids
+        int threshold
+        int time_window
+        string severity
+        boolean enabled
+    }
+
+    ml_analysis {
+        int id PK
+        int user_id FK
+        int computer_id FK
+        datetime analysis_time
+        float risk_score
+        float anomaly_score
+        string behavior_type
+        string explanation
+        string model_version
+    }
+
+    user_computer {
+        int user_id FK
+        int computer_id FK
+        datetime first_seen
+        datetime last_seen
+    }
+
+    sessions {
+        int id PK
+        int user_id FK
+        int computer_id FK
+        datetime login_time
+        datetime logout_time
+        string source_ip
+        int logon_type
     }
 ```
 
 ## Data Dictionary
 
-### 1. `events_raw`
-Stores the original, unprocessed event logs.
+### 1. `users`
+Represents the people/accounts in the AD.
+Columns: `id`, `username`, `display_name`, `domain`, `department`, `role`, `status`, `created_at`
 
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | Integer | PK, Auto-increment | Unique identifier for the raw event. |
-| `timestamp` | DateTime | Default: `now()` | When the event was received/logged. |
-| `raw_json` | JSON | | The raw, unstructured event data. |
+### 2. `computers`
+Represents the employee computers.
+Columns: `id`, `hostname`, `ip_address`, `domain`, `operating_system`, `department`, `status`, `last_seen`
 
-### 2. `events_normalized`
-Stores parsed and standardized event data extracted from raw events.
+### 3. `events`
+Stores the raw and normalized Windows security events collected from computers.
+Columns: `id`, `timestamp`, `event_id`, `username`, `computer_id`, `domain`, `source_ip`, `logon_type`, `record_id`, `channel`, `provider`, `raw_event`, `created_at`
 
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | Integer | PK, Auto-increment | Unique identifier for the normalized event. |
-| `timestamp` | DateTime | | When the actual event occurred. |
-| `event_type` | String | Indexed | The categorized type of the event. |
-| `user_name` | String | Indexed, Nullable | The user associated with the event. |
-| `computer_name` | String | Indexed, Nullable | The machine associated with the event. |
-| `source_ip` | String | Nullable | Source IP address of the event. |
-| `status` | String | Nullable | Success/Failure status. |
-| `raw_event_id` | Integer | FK (`events_raw.id`) | Reference back to the original raw event. |
+### 4. `alerts`
+Security alerts generated by the system.
+Columns: `id`, `timestamp`, `alert_type`, `severity`, `username`, `computer_id`, `source_ip`, `description`, `status`, `detection_rule`, `created_at`
 
-### 3. `entities`
-Stores information about entities (users, computers) being monitored.
+### 5. `alert_events` (Association Table)
+Maps multiple events to a single alert. For example, linking 5 failed logon events to a single Brute Force Alert.
+Columns: `alert_id`, `event_id`
 
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | Integer | PK, Auto-increment | Unique identifier for the entity. |
-| `entity_type` | String | | The type of entity (e.g., 'user', 'computer'). |
-| `name` | String | Indexed, Unique | The unique name/identifier of the entity. |
-| `is_privileged` | Boolean| Default: `False` | Whether the entity has elevated privileges. |
-| `department` | String | Nullable | The department the entity belongs to. |
+### 6. `detection_rules`
+Stores the rule-based detection logic to organize what triggers alerts.
+Columns: `id`, `name`, `description`, `event_ids`, `threshold`, `time_window`, `severity`, `enabled`
 
-### 4. `baselines`
-Stores behavioral baselines for entities to detect anomalies.
+### 7. `ml_analysis`
+Stores the results from Machine Learning anomaly detection algorithms.
+Columns: `id`, `user_id`, `computer_id`, `analysis_time`, `risk_score`, `anomaly_score`, `behavior_type`, `explanation`, `model_version`
 
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | Integer | PK, Auto-increment | Unique identifier for the baseline record. |
-| `entity_id` | Integer | FK (`entities.id`) | Reference to the entity this baseline is for. |
-| `feature_name`| String | | The metric or feature being baselined. |
-| `mean_value` | Float | | The historical average value. |
-| `std_dev` | Float | | The historical standard deviation. |
+### 8. `user_computer` (Association Table)
+Tracks which users normally use which computers for behavioral analysis.
+Columns: `user_id`, `computer_id`, `first_seen`, `last_seen`
 
-### 5. `alerts`
-Stores security alerts generated by anomaly detection.
-
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | Integer | PK, Auto-increment | Internal unique identifier for the alert. |
-| `alert_id` | String | Indexed, Unique | Public-facing unique alert identifier. |
-| `entity_id` | Integer | FK (`entities.id`) | The entity that triggered the alert. |
-| `risk_score` | Float | | The calculated risk score. |
-| `severity` | String | | Alert severity (e.g., Low, Medium, High). |
-| `reasons_json`| JSON | | Detailed JSON explaining why the alert fired. |
-| `timestamp` | DateTime | Default: `now()` | When the alert was generated. |
+### 9. `sessions`
+Tracks active user sessions on specific computers.
+Columns: `id`, `user_id`, `computer_id`, `login_time`, `logout_time`, `source_ip`, `logon_type`
