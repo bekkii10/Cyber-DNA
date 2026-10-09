@@ -1,0 +1,206 @@
+/* Design tokens. Every colour used in the UI comes from here so both themes stay readable. */
+:root {
+  --font: Inter, "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem; --sp-5: 1.25rem; --sp-6: 1.5rem; --sp-8: 2rem;
+  --r-sm: .375rem; --r: .625rem; --r-lg: .875rem;
+  --sidebar-w: 16.5rem; --topbar-h: 3.75rem;
+
+  color-scheme: light;
+  --bg: #f1f4f9; --surface: #ffffff; --surface-2: #f7f9fc; --surface-3: #edf1f7;
+  --border: #dde4ee; --border-strong: #c5cfdf;
+  --text: #0e1e3d; --text-2: #3a4a68; --muted: #586783;
+  --primary: #1d4ed8; --primary-hover: #1941b8; --primary-soft: #e7eeff; --on-primary: #ffffff;
+  --accent: #5b3fd1; --accent-soft: #eee9ff;
+  --focus: #2563eb;
+  --shadow-sm: 0 1px 2px rgba(15,31,64,.06);
+  --shadow: 0 1px 3px rgba(15,31,64,.07), 0 6px 18px rgba(15,31,64,.05);
+  --shadow-pop: 0 12px 36px rgba(15,31,64,.18);
+  --overlay: rgba(9,20,45,.55);
+
+  --crit: #b42318; --crit-bg: #fde9e7; --crit-bd: #f4bdb7; --crit-solid: #d92d20;
+  --high: #b93815; --high-bg: #ffeede; --high-bd: #f8cfa8; --high-solid: #ea6a1f;
+  --med: #8a5a00; --med-bg: #fff4d6; --med-bd: #f1dc9a; --med-solid: #e5a20b;
+  --low: #0b6a85; --low-bg: #def4fa; --low-bd: #aee0ee; --low-solid: #1796b8;
+  --info: #3f51a3; --info-bg: #eaedfb; --info-bd: #c6cdf0; --info-solid: #6677c8;
+  --ok: #0a7469; --ok-bg: #ddf5f0; --ok-bd: #a8e3d8; --ok-solid: #12a594;
+
+  --c1: #1d4ed8; --c2: #6d4fe0; --c3: #0f9aa8; --c4: #e08a1e; --c5: #8392ab;
+  --chart-grid: #e3e9f2; --chart-axis: #4f5f7c; --chart-tip-bg: #0e1e3d; --chart-tip-text: #ffffff;
+
+  --nav-bg: #0a1b45; --nav-bg-2: #0e2559; --nav-text: #c3d0ee; --nav-muted: #93a6d4; --nav-hover: rgba(255,255,255,.08);
+  --nav-active: #1f4fd8; --nav-border: rgba(255,255,255,.12);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1325; --surface: #111c33; --surface-2: #16233e; --surface-3: #1c2b4a;
+  --border: #25365a; --border-strong: #34497a;
+  --text: #eaf0fc; --text-2: #bfcce6; --muted: #92a4c8;
+  --primary: #5b8def; --primary-hover: #7aa3f6; --primary-soft: rgba(91,141,239,.16); --on-primary: #08122a;
+  --accent: #9b86f3; --accent-soft: rgba(155,134,243,.16);
+  --focus: #7aa3f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow: 0 1px 3px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.22);
+  --shadow-pop: 0 14px 40px rgba(0,0,0,.55);
+  --overlay: rgba(3,8,20,.7);
+
+  --crit: #ffaaa3; --crit-bg: rgba(240,68,56,.16); --crit-bd: rgba(240,68,56,.4); --crit-solid: #f04438;
+  --high: #ffb98a; --high-bg: rgba(247,126,45,.16); --high-bd: rgba(247,126,45,.4); --high-solid: #f77e2d;
+  --med: #f7d37a; --med-bg: rgba(245,184,28,.15); --med-bd: rgba(245,184,28,.38); --med-solid: #f5b81c;
+  --low: #7fd8ef; --low-bg: rgba(38,182,214,.15); --low-bd: rgba(38,182,214,.38); --low-solid: #26b6d6;
+  --info: #b3bff5; --info-bg: rgba(130,148,230,.17); --info-bd: rgba(130,148,230,.4); --info-solid: #8294e6;
+  --ok: #6fe0cd; --ok-bg: rgba(32,201,170,.15); --ok-bd: rgba(32,201,170,.38); --ok-solid: #20c9aa;
+
+  --c1: #6e9bf5; --c2: #a08af5; --c3: #34c6d4; --c4: #f0a448; --c5: #8ea0c0;
+  --chart-grid: #263a60; --chart-axis: #a5b5d5; --chart-tip-bg: #f2f6ff; --chart-tip-text: #0e1e3d;
+
+  --nav-bg: #08142e; --nav-bg-2: #0c1d44; --nav-active: #2f62e0;
+}
+
+:root[data-font="large"] { font-size: 112.5%; }
+:root[data-theme="cyberdna"] {
+  color-scheme: dark;
+
+  /* --- Core backgrounds --- */
+  --bg: #050505;
+  --surface: #111111;
+  --surface-2: #161616;
+  --surface-3: #1f1f1f;
+
+  /* --- Borders --- */
+  --border: #2a2a2a;
+  --border-strong: #444444;
+
+  /* --- Text --- */
+  --text: #ffffff;
+  --text-2: #bfbfbf;
+  --muted: #888888;
+
+  /* --- Primary Accent (Orange) --- */
+  --primary: #FF4500;
+  --primary-hover: #e63e00;
+  --primary-soft: rgba(255, 69, 0, 0.15);
+  --on-primary: #ffffff;
+
+  /* --- Accent (secondary highlight) --- */
+  --accent: #ff8c42;
+  --accent-soft: rgba(255, 140, 66, 0.16);
+
+  /* --- Focus ring --- */
+  --focus: #FF4500;
+
+  /* --- Shadows (deeper for dark theme) --- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow: 0 1px 3px rgba(0,0,0,.45), 0 8px 22px rgba(0,0,0,.35);
+  --shadow-pop: 0 14px 40px rgba(0,0,0,.6);
+  --overlay: rgba(0,0,0,.75);
+
+  /* --- Severity colors --- */
+  --crit: #ffaaa3; --crit-bg: rgba(240,68,56,.16); --crit-bd: rgba(240,68,56,.4); --crit-solid: #f04438;
+  --high: #ffb98a; --high-bg: rgba(255,69,0,.16);  --high-bd: rgba(255,69,0,.4);  --high-solid: #FF4500;
+  --med:  #f7d37a; --med-bg:  rgba(245,184,28,.15); --med-bd:  rgba(245,184,28,.38); --med-solid: #f5b81c;
+  --low:  #7fd8ef; --low-bg:  rgba(38,182,214,.15); --low-bd:  rgba(38,182,214,.38); --low-solid: #26b6d6;
+  --info: #b3bff5; --info-bg: rgba(255,69,0,.14);  --info-bd: rgba(255,69,0,.35);  --info-solid: #FF4500;
+  --ok:   #6fe0cd; --ok-bg:   rgba(32,201,170,.15); --ok-bd:   rgba(32,201,170,.38); --ok-solid: #20c9aa;
+
+  /* --- Chart colors --- */
+  --c1: #FF4500;
+  --c2: #ff8c42;
+  --c3: #ffb700;
+  --c4: #a1a1aa;
+  --c5: #555555;
+  --chart-grid: #1f1f1f;
+  --chart-axis: #888888;
+  --chart-tip-bg: #f2f6ff;
+  --chart-tip-text: #050505;
+
+  /* =========================================
+     SIDEBAR (this is the missing part!)
+     ========================================= */
+  --nav-bg: #0a0a0a;          /* Sidebar background */
+  --nav-bg-2: #111111;        /* Gradient end */
+  --nav-text: #e5e5e5;        /* Nav item text */
+  --nav-muted: #888888;       /* Section labels */
+  --nav-hover: rgba(255, 69, 0, 0.10);   /* Hover (orange tint) */
+  --nav-active: #FF4500;      /* Active item = ORANGE */
+  --nav-border: rgba(255, 255, 255, 0.08);
+}
+  /* Login-page specific overrides */
+  --login-left-bg: #0a0a0a;
+  --login-left-bg-2: #111111;
+  --login-icon-bg: rgba(255, 69, 0, 0.15);
+  --login-icon-fg: #FF4500;
+  /* Login page specific */
+  --login-bg: #050505;
+  --login-left-bg: #0a0a0a;
+  --login-left-bg-2: #111111;
+  --login-left-border: #1a1a1a;
+  --login-left-accent: #FF4500;
+  --login-icon-bg: rgba(255, 69, 0, 0.12);
+  --login-icon-fg: #FF4500;
+  --login-input-bg: #FFF8E7;
+  --login-input-text: #050505;
+  --login-input-placeholder: #666;
+  --login-grid-line: rgba(255, 69, 0, 0.05);
+/* ============================================
+   FORCED CYBER DNA OVERRIDES
+   This block uses !important so it always wins.
+   ============================================ */
+html[data-theme="cyberdna"] {
+  --bg: #050505 !important;
+  --surface: #111111 !important;
+  --surface-2: #161616 !important;
+  --surface-3: #1f1f1f !important;
+
+  --border: #2a2a2a !important;
+  --border-strong: #444444 !important;
+
+  --text: #ffffff !important;
+  --text-2: #bfbfbf !important;
+  --muted: #888888 !important;
+
+  --primary: #FF4500 !important;
+  --primary-hover: #e63e00 !important;
+  --primary-soft: rgba(255, 69, 0, 0.15) !important;
+  --on-primary: #ffffff !important;
+
+  --accent: #ff8c42 !important;
+  --accent-soft: rgba(255, 140, 66, 0.16) !important;
+
+  --focus: #FF4500 !important;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4) !important;
+  --shadow: 0 1px 3px rgba(0,0,0,.45), 0 8px 22px rgba(0,0,0,.35) !important;
+  --shadow-pop: 0 14px 40px rgba(0,0,0,.6) !important;
+  --overlay: rgba(0,0,0,.75) !important;
+
+  --crit: #ffaaa3 !important; --crit-bg: rgba(240,68,56,.16) !important;
+  --crit-bd: rgba(240,68,56,.4) !important; --crit-solid: #f04438 !important;
+  --high: #ffb98a !important; --high-bg: rgba(255,69,0,.16) !important;
+  --high-bd: rgba(255,69,0,.4) !important; --high-solid: #FF4500 !important;
+  --med: #f7d37a !important; --med-bg: rgba(245,184,28,.15) !important;
+  --med-bd: rgba(245,184,28,.38) !important; --med-solid: #f5b81c !important;
+  --low: #7fd8ef !important; --low-bg: rgba(38,182,214,.15) !important;
+  --low-bd: rgba(38,182,214,.38) !important; --low-solid: #26b6d6 !important;
+  --info: #b3bff5 !important; --info-bg: rgba(255,69,0,.14) !important;
+  --info-bd: rgba(255,69,0,.35) !important; --info-solid: #FF4500 !important;
+  --ok: #6fe0cd !important; --ok-bg: rgba(32,201,170,.15) !important;
+  --ok-bd: rgba(32,201,170,.38) !important; --ok-solid: #20c9aa !important;
+
+  --c1: #FF4500 !important; --c2: #ff8c42 !important;
+  --c3: #ffb700 !important; --c4: #a1a1aa !important; --c5: #555555 !important;
+  --chart-grid: #1f1f1f !important; --chart-axis: #888888 !important;
+  --chart-tip-bg: #f2f6ff !important; --chart-tip-text: #050505 !important;
+
+  --nav-bg: #0a0a0a !important;
+  --nav-bg-2: #111111 !important;
+  --nav-text: #e5e5e5 !important;
+  --nav-muted: #888888 !important;
+  --nav-hover: rgba(255, 69, 0, 0.10) !important;
+  --nav-active: #FF4500 !important;
+  --nav-border: rgba(255, 255, 255, 0.08) !important;
+
+  /* Force correct color-scheme (not cyberdna) */
+  color-scheme: dark !important;
+}

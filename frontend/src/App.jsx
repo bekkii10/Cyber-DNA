@@ -1,602 +1,185 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./index.css";
-import "./App.css";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { DataProvider, useData } from './data/DataContext';
+import { useSettings } from './hooks/useSettings';
+import Login, { Splash } from './components/Login';
+import Sidebar, { NAV } from './components/Sidebar';
+import Header from './components/Header';
+import { SettingsDialog, PinDialog, ProfileDialog } from './components/Dialogs';
+import Overview from './pages/Overview';
+import Alerts from './pages/Alerts';
+import Incidents from './pages/Incidents';
+import UserBehavior from './pages/UserBehavior';
+import Hosts from './pages/Hosts';
+import Rules from './pages/Rules';
+import RiskML from './pages/RiskML';
+import Architecture from './pages/Architecture';
 
-import {
-  LogOut,
-  Activity,
-  AlertTriangle,
-  Bell,
-  BrainCircuit,
-  CheckCircle2,
-  CircleDot,
-  Clock3,
-  Database,
-  Eye,
-  EyeOff,
-  FileWarning,
-  Gauge,
-  LayoutDashboard,
-  LockKeyhole,
-  Network,
-  Pause,
-  Play,
-  Radar,
-  RefreshCw,
-  Search,
-  Server,
-  Settings2,
-  Shield,
-  ShieldCheck,
-  Terminal,
-  Users,
-  User,
-  UserRound,        // 👈 ADDED THIS LINE
-  X,
-  Volume2,
-  Palette,
-  Type,
-  Image as ImageIcon,
-  Check,
-  Upload,
-  MonitorCog,
-  ChevronRight
-} from "lucide-react";
-const severityMeta = {
-  Critical: { className: "critical" },
-  High: { className: "high" },
-  Medium: { className: "medium" },
-  Low: { className: "low" },
-};
+const PAGES = NAV.flatMap((g) => g.items.map(([n]) => n));
+const slug = (p) => p.toLowerCase().replace(/[^a-z]+/g, '-');
+const fromHash = () => PAGES.find((p) => `#/${slug(p)}` === window.location.hash) || 'Overview';
+const SESSION = 'cyberdna-session';
+const THEME_CYCLE = ['light', 'dark', 'cyberdna'];
 
-const seedEvents = [
-  { id:"E-1042", time:"14:08:31", event:"4625", user:"svc_backup", host:"WS-EXEC01", ip:"10.0.0.14", result:"FAILURE", action:"Failed logon" },
-  { id:"E-1041", time:"14:08:27", event:"4769", user:"mchen", host:"DC-PROD01", ip:"10.10.5.33", result:"SUCCESS", action:"Kerberos service ticket requested" },
-  { id:"E-1040", time:"14:08:21", event:"4728", user:"admin", host:"DC01", ip:"192.168.1.10", result:"SUCCESS", action:"Added to privileged group" },
-  { id:"E-1039", time:"14:08:14", event:"4672", user:"j.chen", host:"WS-FINANCE03", ip:"192.168.1.50", result:"SUCCESS", action:"Special privileges assigned" },
-  { id:"E-1038", time:"14:08:05", event:"4624", user:"a.smith", host:"WS-HR02", ip:"10.0.0.22", result:"SUCCESS", action:"Successful logon" },
-  { id:"E-1037", time:"14:07:58", event:"4720", user:"it_help", host:"DC01", ip:"10.0.0.8", result:"SUCCESS", action:"User account created" },
-];
+function Shell({ settings, update, onLogout }) {
+  const { alerts, seen, markSeen, live, updated, loading, refresh } = useData();
+  const [page, setPage] = useState(fromHash);
+  const [drawer, setDrawer] = useState(false);
+  const [dialog, setDialog] = useState(null); // settings | pin | profile
+  const [query, setQuery] = useState('');
+  const scroller = useRef(null);
 
-const seedAlerts = [
-  { id:"ALT-901", seen:false, severity:"Critical", rule:"Privilege Escalation", score:92, user:"j.chen", host:"DC01", ip:"192.168.1.10", time:"14:07:55", detail:"User was added to Domain Admins outside the normal change window.", source:"Windows Security Event 4728", explanation:"The account's current activity differs strongly from its normal privilege baseline." },
-  { id:"ALT-902", seen:false, severity:"High", rule:"Password Spray", score:86, user:"kwilson", host:"WS-DEV04", ip:"192.168.1.15", time:"14:06:42", detail:"Many authentication failures were observed across different accounts from one source.", source:"Windows Security Events 4625", explanation:"The pattern is consistent with distributed password guessing rather than one user's normal login behavior." },
-  { id:"ALT-903", seen:false, severity:"High", rule:"ML Behavioral Anomaly", score:79, user:"mchen", host:"DC-PROD01", ip:"10.0.0.14", time:"14:02:44", detail:"Sensitive domain-controller access occurred outside the user's baseline hours.", source:"4624 + baseline model", explanation:"The behavioral model found an unusual combination of time, host and activity for this user." },
-  { id:"ALT-904", seen:true, severity:"Medium", rule:"Unusual Logon Time", score:61, user:"svc.monitor", host:"WS-ADMIN01", ip:"10.10.5.19", time:"13:51:02", detail:"Interactive logon occurred outside the normal activity window.", source:"Windows Security Event 4624", explanation:"The event is unusual but does not by itself prove malicious activity." },
-];
+  useEffect(() => {
+    const on = () => setPage(fromHash());
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
 
-const users = [
-  { name:"j.chen", dept:"Finance", score:97, status:"Active", signal:"Privilege change" },
-  { name:"svc.monitor", dept:"Operations", score:88, status:"Active", signal:"Off-hours access" },
-  { name:"a.smith", dept:"IT", score:72, status:"Monitored", signal:"New host access" },
-  { name:"k.wilson", dept:"Engineering", score:55, status:"Monitored", signal:"Auth failures" },
-];
+  const go = useCallback((p) => {
+    window.location.hash = `/${slug(p)}`;
+  }, []);
 
-const incidents = [
-  { id:"INC-2026-01", title:"Domain Admin privilege escalation", risk:"Critical", score:95, status:"OPEN", users:2, hosts:2, first:"13:45", last:"14:08", chain:["Password spray","Successful logon","Privilege change"] },
-  { id:"INC-2026-02", title:"Abnormal Kerberos ticket activity", risk:"High", score:78, status:"INVESTIGATING", users:1, hosts:3, first:"11:20", last:"13:10", chain:["Unusual ticket volume","Sensitive host access"] },
-  { id:"INC-2026-03", title:"Off-hours lateral movement", risk:"Medium", score:58, status:"OPEN", users:1, hosts:4, first:"02:15", last:"03:00", chain:["Off-hours logon","SMB activity","Multiple hosts"] },
-];
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [page]);
 
-const rules = [
-  ["Brute Force Detection","Authentication","High","Failures > 10 in 60s from one source",true,14],
-  ["Password Spraying","Authentication","Critical","Failures across > 5 accounts from one IP",true,8],
-  ["Unusual Logon Time","Behavioral Baseline","Medium","Outside learned activity window",true,22],
-  ["New Account Creation","Active Directory","Low","4720 outside change window",false,5],
-  ["Privilege Escalation","Active Directory","Critical","Privileged group membership change",true,3],
-  ["Suspicious Kerberos","Kerberos","High","Abnormal ticket request pattern",true,6],
-];
+  useEffect(() => {
+    if (!drawer) return undefined;
+    const k = (e) => e.key === 'Escape' && setDrawer(false);
+    document.addEventListener('keydown', k);
+    return () => document.removeEventListener('keydown', k);
+  }, [drawer]);
 
-function Badge({severity}) {
-  return <span className={`badge ${severityMeta[severity]?.className || ""}`}>{severity}</span>;
-}
-
-function StatCard({icon:Icon, label, value, note, tone=""}) {
-  return <div className="stat-card">
-    <div className="stat-top"><span>{label}</span><Icon size={18} /></div>
-    <div className={`stat-value ${tone}`}>{value}</div>
-    <div className="stat-note">{note}</div>
-  </div>;
-}
-
-function Section({title, icon:Icon, action, children, className=""}) {
-  return <section className={`panel ${className}`}>
-    <div className="panel-head">
-      <div className="panel-title"><Icon size={17}/><span>{title}</span></div>
-      {action}
-    </div>
-    {children}
-  </section>;
-}
-
-function Overview({events, alerts, setSelectedAlert}) {
-  const activity = useMemo(() => {
-    const buckets = Array.from({length: 24}, (_, hour) => ({ hour, count: 0 }));
-    events.forEach(evt => {
-      const match = String(evt.time || '').match(/^(\d{1,2})/);
-      if (!match) return;
-      const hour = Number(match[1]);
-      if (hour >= 0 && hour < 24) buckets[hour].count += 1;
-    });
-    const max = Math.max(1, ...buckets.map(b => b.count));
-    const total = buckets.reduce((sum, b) => sum + b.count, 0);
-    return { buckets: buckets.map(b => ({ ...b, height: (b.count / max) * 100 })), max, total };
-  }, [events]);
-  const unread = alerts.filter(a => !a.seen).length;
-  return <div className="page-stack">
-    <div className="stats-grid">
-      <StatCard icon={Database} label="Events in feed" value={events.length.toLocaleString()} note="Current collected prototype feed" />
-      <StatCard icon={Bell} label="Active alerts" value={alerts.length} note={`${alerts.filter(a=>a.severity==='Critical').length} critical • ${alerts.filter(a=>a.severity==='High').length} high`} tone="warning" />
-      <StatCard icon={FileWarning} label="Open incidents" value={incidents.length} note="Correlated investigation cases" tone="danger" />
-      <StatCard icon={Users} label="High-risk users" value={users.filter(u=>u.score>=70).length} note={`of ${users.length} visible profiles`} />
-      <StatCard icon={Server} label="Monitored hosts" value="38" note="36 online • 2 offline" />
-    </div>
-
-    <div className="two-col">
-      <Section title="Event activity" icon={Activity} action={<span className="live-pill"><i/> FEED DATA</span>}>
-        <div className="chart-wrap">
-          <div className="chart-labels"><span>{activity.max}</span><span>{Math.round(activity.max*.75)}</span><span>{Math.round(activity.max*.5)}</span><span>{Math.round(activity.max*.25)}</span><span>0</span></div>
-          <div className="bar-chart" aria-label="Event activity derived from the current event feed">
-            {activity.buckets.map(point => <div className="bar-col" key={point.hour} title={`${point.hour.toString().padStart(2,'0')}:00 — ${point.count} event${point.count===1?'':'s'}`}>
-              <div className="bar-track"><div className="bar-fill" style={{height:`${Math.max(point.count ? 5 : 1, point.height)}%`}}/></div>
-              {point.hour % 4 === 0 && <span>{point.hour.toString().padStart(2,'0')}</span>}
-            </div>)}
-          </div>
-          <div className="chart-foot"><span>24-hour view • current feed</span><b>{activity.total} events</b><span>Peak: {activity.max}/hr • {unread} unseen</span></div>
-        </div>
-      </Section>
-
-      <Section title="Risk distribution" icon={Gauge}>
-        <div className="risk-donut">
-          <div className="donut"><div><strong>{alerts.length}</strong><span>alerts</span></div></div>
-          <div className="legend">
-            {Object.entries(alerts.reduce((acc,a)=>(acc[a.severity]=(acc[a.severity]||0)+1,acc),{})).map(([k,v])=><div key={k}><span className={`dot ${severityMeta[k].className}`}/><span>{k}</span><b>{v}</b></div>)}
-          </div>
-        </div>
-      </Section>
-    </div>
-
-    <div className="two-col">
-      <Section title="Live event feed" icon={Terminal} action={<button className="ghost-btn"><RefreshCw size={14}/> Refresh</button>}>
-        <EventTable events={events.slice(0,6)} />
-      </Section>
-      <Section title="Recent alerts" icon={AlertTriangle}>
-        <div className="alert-list">
-          {alerts.slice(0,4).map(a=><button className="alert-row" key={a.id} onClick={()=>setSelectedAlert(a)}>
-            <Badge severity={a.severity}/><div><strong>{a.rule}</strong><small>{a.user} • {a.host}</small></div><b>{a.score}</b><ChevronRight size={15}/>
-          </button>)}
-        </div>
-      </Section>
-    </div>
-  </div>;
-}
-
-function EventTable({events}) {
-  return <div className="table-scroll"><table><thead><tr><th>TIME</th><th>EVENT</th><th>USER</th><th>HOST</th><th>RESULT</th><th>ACTION</th></tr></thead><tbody>
-    {events.map(e=><tr key={e.id}><td className="muted">{e.time}</td><td className="event-id">{e.event}</td><td>{e.user}</td><td>{e.host}</td><td><span className={e.result==="FAILURE"?"failure":"success"}>{e.result}</span></td><td className="muted">{e.action}</td></tr>)}
-  </tbody></table></div>;
-}
-
-function Alerts({alerts,setSelectedAlert}) {
-  const [filter,setFilter]=useState("ALL"), [q,setQ]=useState("");
-  const shown=alerts.filter(a=>(filter==="ALL"||a.severity.toUpperCase()===filter)&&`${a.rule} ${a.user} ${a.host} ${a.ip}`.toLowerCase().includes(q.toLowerCase()));
-  return <div className="page-stack"><Section title="Security alerts" icon={AlertTriangle} action={<span className="muted">{shown.length} results</span>}>
-    <div className="toolbar">
-      <div className="filters">{["ALL","CRITICAL","HIGH","MEDIUM","LOW"].map(x=><button key={x} className={filter===x?"filter active":"filter"} onClick={()=>setFilter(x)}>{x}</button>)}</div>
-      <label className="search"><Search size={15}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search user, host, rule or IP"/></label>
-    </div>
-    <div className="table-scroll"><table><thead><tr><th>SEVERITY</th><th>DETECTION</th><th>USER</th><th>HOST</th><th>SOURCE IP</th><th>TIME</th><th>SCORE</th><th></th></tr></thead><tbody>
-      {shown.map(a=><tr key={a.id} onClick={()=>setSelectedAlert(a)} className="clickable"><td><Badge severity={a.severity}/></td><td><strong>{a.rule}</strong><small>{a.detail}</small></td><td>{a.user}</td><td>{a.host}</td><td className="muted">{a.ip}</td><td className="muted">{a.time}</td><td><span className={`score ${severityMeta[a.severity].className}`}>{a.score}</span></td><td><Eye size={16}/></td></tr>)}
-    </tbody></table></div>
-  </Section></div>;
-}
-
-function Incidents({setSelectedIncident}) {
-  return <div className="page-stack"><Section title="Correlated incidents" icon={Network} action={<span className="muted">Detection engine • correlation enabled</span>}>
-    <div className="incident-grid">{incidents.map(i=><button className="incident-card" key={i.id} onClick={()=>setSelectedIncident(i)}>
-      <div className="incident-head"><Badge severity={i.risk}/><span>{i.status}</span></div>
-      <h3>{i.title}</h3><p>{i.id} • {i.first}–{i.last}</p>
-      <div className="chain">{i.chain.map((x,n)=><React.Fragment key={x}><span>{x}</span>{n<i.chain.length-1&&<ChevronRight size={13}/>}</React.Fragment>)}</div>
-      <div className="incident-meta"><span>{i.users} users</span><span>{i.hosts} hosts</span><strong>{i.score}/100</strong></div>
-    </button>)}</div>
-  </Section></div>;
-}
-
-function UsersTab({setSelectedUser}) {
-  return <div className="page-stack"><Section title="User behavioral analytics" icon={BrainCircuit} action={<span className="model-status"><i/> Model active</span>}>
-    <div className="info-banner"><BrainCircuit size={20}/><div><strong>Behavioral baseline</strong><p>The model learns normal login time, hosts, authentication patterns and privilege activity for each user. A score indicates how unusual the current behavior is.</p></div></div>
-    <div className="user-grid">{users.map(u=><button className="user-card" key={u.name} onClick={()=>setSelectedUser(u)}>
-      <div className="user-avatar"><UserRound size={20}/></div><div className="user-main"><strong>{u.name}</strong><span>{u.dept} • {u.status}</span></div><div className="risk-score"><strong>{u.score}</strong><small>risk</small></div>
-      <div className="meter"><i style={{width:`${u.score}%`}}/></div><small className="muted">Latest signal: {u.signal}</small>
-    </button>)}</div>
-  </Section></div>;
-}
-
-function Hosts() {
-  const hosts=[["DC01","192.168.1.10","Critical",95],["WS-FINANCE03","192.168.1.103","High",78],["WS-ADMIN01","192.168.1.50","High",62],["WS-HR02","192.168.1.88","Medium",32]];
-  return <div className="page-stack"><Section title="Monitored hosts" icon={Server}><div className="host-grid">{hosts.map(h=><div className="host-card" key={h[0]}><div className="host-icon"><Server size={20}/></div><div><strong>{h[0]}</strong><span>{h[1]}</span></div><Badge severity={h[2]}/><div className="host-bottom"><span>Risk score</span><b>{h[3]}</b></div></div>)}</div></Section></div>;
-}
-
-function Rules() {
-  return <div className="page-stack"><Section title="Detection rules" icon={ShieldCheck} action={<button className="ghost-btn"><Settings2 size={14}/> Manage</button>}><div className="table-scroll"><table><thead><tr><th>RULE</th><th>TYPE</th><th>SEVERITY</th><th>LOGIC</th><th>ALERTS</th><th>STATUS</th></tr></thead><tbody>
-    {rules.map(r=><tr key={r[0]}><td><strong>{r[0]}</strong></td><td className="muted">{r[1]}</td><td><Badge severity={r[2]}/></td><td className="muted">{r[3]}</td><td>{r[5]}</td><td><span className={r[4]?"enabled":"disabled"}>{r[4]?"ENABLED":"DISABLED"}</span></td></tr>)}
-  </tbody></table></div></Section></div>;
-}
-
-function Pipeline() {
-  const steps=[["Windows / AD","Security logs","Users, hosts, authentication"],["Collector","Normalize","Event IDs + timestamps + source"],["Detection engine","Rules + ML","Known threats + anomalies"],["Risk engine","Score","User / host / incident risk"],["Dashboard","Investigate","Alert → evidence → response"]];
-  return <div className="page-stack"><Section title="Platform architecture" icon={Radar} action={<span className="muted">Prototype data flow</span>}><div className="pipeline">{steps.map((s,i)=><React.Fragment key={s[0]}><div className="pipe-step"><span>{String(i+1).padStart(2,"0")}</span><div><strong>{s[0]}</strong><b>{s[1]}</b><small>{s[2]}</small></div></div>{i<steps.length-1&&<ChevronRight className="pipe-arrow" size={20}/>}</React.Fragment>)}</div><div className="architecture-note"><Shield size={18}/><div><strong>How this maps to the real project</strong><p>Windows Event Logs are collected from the AD environment. Rule-based detection catches known patterns, while behavioral analytics identifies unusual activity. The risk engine combines signals and the UI presents evidence for investigation.</p></div></div></Section></div>;
-}
-
-const fontOptions = [
-  ['inter','Inter'], ['system','System UI'], ['plex','IBM Plex Sans'], ['roboto','Roboto'],
-  ['source','Source Sans 3'], ['manrope','Manrope'], ['nunito','Nunito Sans'], ['work','Work Sans'],
-  ['space','Space Grotesk'], ['atkinson','Atkinson Hyperlegible']
-];
-const fontStacks = {
-  inter:'Inter,system-ui,sans-serif', system:'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-  plex:'"IBM Plex Sans",Inter,sans-serif', roboto:'Roboto,Arial,sans-serif', source:'"Source Sans 3",Inter,sans-serif',
-  manrope:'Manrope,Inter,sans-serif', nunito:'"Nunito Sans",Inter,sans-serif', work:'"Work Sans",Inter,sans-serif',
-  space:'"Space Grotesk",Inter,sans-serif', atkinson:'"Atkinson Hyperlegible",Inter,sans-serif'
-};
-
-function SettingsPanel({settings, setSettings, onClose, playTone, onChangePin}) {
-  const [pin, setPin] = useState('');
-  const [pin2, setPin2] = useState('');
-  const [pinMsg, setPinMsg] = useState('');
-  const [openSection, setOpenSection] = useState('sound');
-  const applyPin = () => {
-    if (!/^\d{4,6}$/.test(pin)) return setPinMsg('PIN must be 4–6 digits.');
-    if (pin !== pin2) return setPinMsg('PIN values do not match.');
-    onChangePin(pin); setPin(''); setPin2(''); setPinMsg('PIN updated.');
+  const status = {
+    collector: live ? 'online' : 'demo',
+    api: live ? 'online' : 'demo',
+    database: live ? 'online' : 'demo',
   };
-  const backgrounds = [['ethiopia','Ethiopian Identity','flag'],['soc-grid','SOC Grid','grid'],['aurora','Cyber Aurora','aurora'],['carbon','Carbon Texture','carbon'],['plain','Plain','plain']];
-  const themes = [['midnight','Midnight'],['slate','Slate'],['forest','Forest'],['carbon','Carbon'],['deep-space','Deep Space']];
-  const toggle = id => setOpenSection(x => x===id ? '' : id);
-  return <div className="settings-drawer">
-    <div className="settings-head"><div><span className="eyebrow">CONSOLE PREFERENCES</span><h2>Settings</h2></div><button className="icon-btn" onClick={onClose}><X size={18}/></button></div>
-    <div className="settings-scroll">
-      <div className="settings-group"><h3><Volume2 size={15}/> Sound</h3><div className="setting-row"><div><b>Interface sound</b><small>Choose a sound profile. Test it immediately.</small></div><select value={settings.sound} onChange={e=>{const value=e.target.value; setSettings(s=>({...s,sound:value})); setTimeout(()=>playTone(520,.10,'sine',.025),0)}}><option value="pulse">System Pulse</option><option value="chime">Soft Chime</option><option value="alert">Alert Beep</option><option value="silent">Silent</option></select></div><label className="toggle-row"><span><b>Sound effects</b><small>Navigation, startup and new-alert sounds</small></span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>{setSettings(s=>({...s,soundEnabled:e.target.checked})); if(e.target.checked) setTimeout(()=>playTone(520,.08,'sine',.025),0)}}/></label><button className="test-sound" onClick={()=>playTone(560,.12,'sine',.03)}><Volume2 size={14}/> Test current sound</button></div>
 
-      <div className="settings-group"><button className="settings-section-toggle" onClick={()=>toggle('theme')}><span><Palette size={15}/> Theme</span><ChevronRight size={15} className={openSection==='theme'?'rotate':''}/></button>{openSection==='theme'&&<div className="theme-grid">{themes.map(([id,label])=><button key={id} className={settings.theme===id?'theme-choice active':'theme-choice'} onClick={()=>setSettings(s=>({...s,theme:id}))}><span className={`theme-preview ${id}`}/><b>{label}</b></button>)}</div>}</div>
+  const newAlerts = settings.alerts ? alerts.filter((a) => a.status === 'New').length : 0;
 
-      <div className="settings-group"><h3><Type size={15}/> Typography</h3><div className="setting-row"><div><b>Font family</b><small>Readable UI font for the console.</small></div><select value={settings.fontFamily} onChange={e=>setSettings(s=>({...s,fontFamily:e.target.value}))}>{fontOptions.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></div><div className="segmented">{['small','normal','large'].map(x=><button key={x} className={settings.fontSize===x?'active':''} onClick={()=>setSettings(s=>({...s,fontSize:x}))}>{x.toUpperCase()}</button>)}</div><div className="scope-note">Font size applies to <button className={settings.fontScope==='system'?'active':''} onClick={()=>setSettings(s=>({...s,fontScope:'system'}))}>whole system</button><button className={settings.fontScope==='page'?'active':''} onClick={()=>setSettings(s=>({...s,fontScope:'page'}))}>this page</button></div></div>
+  const toggleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(settings.theme);
+    const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+    update('theme', next);
+  };
 
-      <div className="settings-group"><button className="settings-section-toggle" onClick={()=>toggle('background')}><span><ImageIcon size={15}/> Background</span><ChevronRight size={15} className={openSection==='background'?'rotate':''}/></button>{openSection==='background'&&<><div className="background-grid-options">{backgrounds.map(([id,label,cls])=><button key={id} className={settings.background===id?'bg-choice active':'bg-choice'} onClick={()=>setSettings(s=>({...s,background:id,customBackground:''}))}><span className={`bg-preview ${cls}`}/><b>{label}</b></button>)}</div><div className="setting-row background-position"><div><b>Image placement</b><small>Control how an uploaded image sits behind the console.</small></div><select value={settings.backgroundPosition||'center'} onChange={e=>setSettings(s=>({...s,backgroundPosition:e.target.value}))}><option value="center">Center</option><option value="top">Top</option><option value="bottom">Bottom</option><option value="left">Left</option><option value="right">Right</option></select></div><label className="upload-btn"><Upload size={14}/> Upload background image<input type="file" accept="image/*" onChange={e=>{const file=e.target.files?.[0]; if(file){const url=URL.createObjectURL(file); setSettings(s=>({...s,background:'custom',customBackground:url}))}}}/></label>{settings.customBackground&&<div className="upload-note"><Check size={13}/> Custom image selected</div>}</>}</div>
+  const closeDialog = useCallback(() => setDialog(null), []);
 
-      <div className="settings-group"><h3><MonitorCog size={15}/> View enhancer</h3><label className="toggle-row"><span><b>Enhanced contrast</b><small>Increase text, border and table contrast</small></span><input type="checkbox" checked={settings.enhancedContrast} onChange={e=>setSettings(s=>({...s,enhancedContrast:e.target.checked}))}/></label><label className="toggle-row"><span><b>Focus highlight</b><small>Clear keyboard and pointer focus</small></span><input type="checkbox" checked={settings.focusGlow} onChange={e=>setSettings(s=>({...s,focusGlow:e.target.checked}))}/></label><label className="toggle-row"><span><b>Compact data view</b><small>Fit more rows and cards on screen</small></span><input type="checkbox" checked={settings.compact} onChange={e=>setSettings(s=>({...s,compact:e.target.checked}))}/></label><label className="toggle-row"><span><b>Reduce motion</b><small>Disable non-essential animation</small></span><input type="checkbox" checked={settings.reduceMotion} onChange={e=>setSettings(s=>({...s,reduceMotion:e.target.checked}))}/></label></div>
+  const props = { query };
+  const view = {
+    Overview: <Overview range={settings.range} setRange={(v) => update('range', v)} />,
+    Alerts: <Alerts {...props} />,
+    Incidents: <Incidents {...props} />,
+    'User Behavior': <UserBehavior {...props} />,
+    Hosts: <Hosts {...props} />,
+    'Detection Rules': <Rules {...props} />,
+    'Risk & ML': <RiskML {...props} />,
+    Architecture: <Architecture />,
+  }[page];
 
-      <div className="settings-group"><h3><LockKeyhole size={15}/> Access PIN</h3><div className="pin-change"><input inputMode="numeric" maxLength="6" type="password" value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,''))} placeholder="New PIN"/><input inputMode="numeric" maxLength="6" type="password" value={pin2} onChange={e=>setPin2(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN"/><button className="primary-btn" onClick={applyPin}><Check size={14}/> Save PIN</button>{pinMsg&&<small className="pin-msg">{pinMsg}</small>}</div></div>
+  return (
+    <div className="shell">
+      <Sidebar
+        page={page}
+        go={go}
+        open={drawer}
+        close={() => setDrawer(false)}
+        openSettings={() => setDialog('settings')}
+        alertCount={newAlerts}
+        status={status}
+      />
+      {drawer && <button type="button" className="shade" aria-label="Close menu" onClick={() => setDrawer(false)} />}
+      <div className="main">
+        <Header
+          page={page}
+          query={query}
+          setQuery={setQuery}
+          onMenu={() => setDrawer(true)}
+          alerts={alerts}
+          seen={seen}
+          markSeen={markSeen}
+          notificationsOn={settings.alerts}
+          go={go}
+          theme={settings.theme}
+          toggleTheme={toggleTheme}
+          live={live}
+          updated={updated}
+          loading={loading}
+          refresh={refresh}
+          onProfile={() => setDialog('profile')}
+          onPin={() => setDialog('pin')}
+          onSettings={() => setDialog('settings')}
+          onLogout={onLogout}
+        />
+        <main className="content" ref={scroller} id="main">{view}</main>
+      </div>
+      {dialog === 'settings' && (
+        <SettingsDialog settings={settings} update={update} onClose={closeDialog} onPin={() => setDialog('pin')} status={{ all: live }} />
+      )}
+      {dialog === 'pin' && <PinDialog onClose={closeDialog} />}
+      {dialog === 'profile' && <ProfileDialog onClose={closeDialog} onPin={() => setDialog('pin')} timeout={settings.timeout} />}
     </div>
-  </div>;
+  );
 }
 
 export default function App() {
-  const logout = () => {
-  try {
-    localStorage.removeItem("cyberDNAHasLogin");
-  } catch {}
-
-  setStarted(false);
-  setUsername("");
-  setPassword("");
-  setConfirmPassword("");
-  setLoginError("");
-  setAuthMode("login");
-};
-  const [started,setStarted]=useState(false);
-  const [booting,setBooting]=useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState('');
-  const [tab,setTab]=useState("overview"), [live,setLive]=useState(true), [events,setEvents]=useState(seedEvents);
-  const [alerts,setAlerts]=useState(seedAlerts);
-  const [unseen,setUnseen]=useState(seedAlerts.filter(a=>!a.seen).length);
-  const [notificationsOpen,setNotificationsOpen]=useState(false);
-  const [settingsOpen,setSettingsOpen]=useState(false);
-  const [settings,setSettings]=useState(()=>{
-    try { const saved=JSON.parse(localStorage.getItem('cyberDNASettings')||'{}'); const base={sound:'pulse',soundEnabled:true,theme:'midnight',fontSize:'normal',fontScope:'system',fontFamily:'inter',background:'ethiopia',backgroundPosition:'center',customBackground:'',enhancedContrast:true,focusGlow:true,compact:false,reduceMotion:false}; const merged={...base,...saved}; if(merged.background==='custom' && !merged.customBackground) merged.background='ethiopia'; return merged; } catch { return {sound:'pulse',soundEnabled:true,theme:'midnight',fontSize:'normal',fontScope:'system',fontFamily:'inter',background:'ethiopia',backgroundPosition:'center',customBackground:'',enhancedContrast:true,focusGlow:true,compact:false,reduceMotion:false}; }
+  const [settings, update] = useSettings();
+  const [splash, setSplash] = useState(() => {
+    try { return !sessionStorage.getItem('cyberdna-splash'); } catch { return true; }
   });
-  const [selectedAlert,setSelectedAlert]=useState(null), [selectedUser,setSelectedUser]=useState(null), [selectedIncident,setSelectedIncident]=useState(null);
-  const audioContextRef = useRef(null);
-  const settingsRef = useRef(settings);
-  const [sidebarWidth,setSidebarWidth]=useState(()=>{try{return Math.min(360,Math.max(210,Number(localStorage.getItem('cyberDNASidebarWidth'))||248))}catch{return 248}});
-  const [resizingSidebar,setResizingSidebar]=useState(false);
-  const [hasLogin, setHasLogin] = useState(() => {
-  try {
-    return localStorage.getItem('cyberDNAHasLogin') === '1';
-  } catch {
-    return false;
-  }
-      });
+  const [logged, setLogged] = useState(() => {
+    try { return sessionStorage.getItem(SESSION) === '1'; } catch { return false; }
+  });
+  const [notice, setNotice] = useState('');
 
-  const playTone=(frequency=440,duration=0.08,type="sine",volume=0.025)=>{
-    const current=settingsRef.current;
-    if(!current.soundEnabled || current.sound==='silent') return;
-    try {
-      const AudioCtx=window.AudioContext||window.webkitAudioContext;
-      if(!AudioCtx) return;
-      if(!audioContextRef.current) audioContextRef.current=new AudioCtx();
-      const ctx=audioContextRef.current;
-      const play=()=>{
-        const osc=ctx.createOscillator(); const gain=ctx.createGain();
-        const selected=current.sound;
-        const actualType=selected==='alert'?'square':selected==='chime'?'triangle':type;
-        const actualFreq=selected==='alert'?660:selected==='chime'?frequency+80:frequency;
-        const now=ctx.currentTime;
-        osc.type=actualType; osc.frequency.setValueAtTime(actualFreq,now);
-        gain.gain.setValueAtTime(Math.max(.001,volume),now); gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-        osc.connect(gain); gain.connect(ctx.destination); osc.start(now); osc.stop(now+duration);
-      };
-      if(ctx.state==='suspended') ctx.resume().then(play).catch(()=>{}); else play();
-    } catch {}
-  };
-  useEffect(()=>{settingsRef.current=settings},[settings]);
+  // === THIS IS THE IMPORTANT PART ===
+  // Apply the selected theme to <html data-theme="...">
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', settings.theme);
+  }, [settings.theme]);
 
-  useEffect(()=>{ try{localStorage.setItem('cyberDNASettings',JSON.stringify({...settings,customBackground:''}));}catch{} },[settings]);
-
-  useEffect(()=>{
-    if(!resizingSidebar) return;
-    const move=e=>setSidebarWidth(Math.min(360,Math.max(210,e.clientX)));
-    const up=()=>setResizingSidebar(false);
-    window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
-    return ()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)};
-  },[resizingSidebar]);
-  useEffect(()=>{try{localStorage.setItem('cyberDNASidebarWidth',String(sidebarWidth))}catch{}},[sidebarWidth]);
-
-  const startSystem = () => {
-  if (booting || started) return;
-
-  setLoginError('');
-
-  if (!username.trim()) {
-    setLoginError('Please enter your username.');
-    return;
-  }
-
-  if (!password) {
-    setLoginError('Please enter your password.');
-    return;
-  }
-
-  // Temporary development credentials
-  if (username.trim() !== 'admin' || password !== 'admin123') {
-    setLoginError('Invalid username or password.');
-    return;
-  }
-
-  try {
-    localStorage.setItem('cyberDNAHasLogin', '1');
-    localStorage.setItem('cyberDNAUsername', username.trim());
-  } catch {}
-
-  setHasLogin(true);
-  setBooting(true);
-
-  playTone(220, 0.12, 'sine', 0.035);
-
-  window.setTimeout(
-    () => playTone(330, 0.12, 'sine', 0.035),
-    140
-  );
-
-  window.setTimeout(
-    () => playTone(495, 0.18, 'triangle', 0.04),
-    290
-  );
-
-  window.setTimeout(() => {
-    setStarted(true);
-    setBooting(false);
-  }, 900);
-};
-
-  
-
-  const navigate=(id)=>{
-    setTab(id);
-    playTone(520,0.045,"square",0.012);
+  const login = () => {
+    try { sessionStorage.setItem(SESSION, '1'); } catch { /* ignore */ }
+    setLogged(true);
   };
 
-  useEffect(()=>{
-    if(!live) return;
-    const timer=setInterval(()=>{
-      const id=Math.floor(1000+Math.random()*99);
-      const fail=Math.random()<.24;
-      const evt={id:`E-${id}`,time:new Date().toLocaleTimeString([], {hour12:false}),event:fail?"4625":"4624",user:["admin","mchen","j.chen","svc_backup","a.smith"][Math.floor(Math.random()*5)],host:["DC01","DC-PROD01","WS-DEV04","WS-HR02"][Math.floor(Math.random()*4)],ip:`10.0.${Math.floor(Math.random()*20)}.${Math.floor(Math.random()*200)}`,result:fail?"FAILURE":"SUCCESS",action:fail?"Failed logon":"Successful logon"};
-      setEvents(x=>[evt,...x].slice(0,40));
-      if(fail && Math.random()<0.28) {
-        const alert={id:`ALT-${Math.floor(1000+Math.random()*8999)}`,seen:false,severity:'High',rule:'Brute Force Detection',score:72,user:evt.user,host:evt.host,ip:evt.ip,time:evt.time,detail:'Repeated failed authentication activity detected in the live event feed.',source:`Windows Security Event ${evt.event}`,explanation:'The live event pattern crossed the configured authentication-failure threshold.'};
-        setAlerts(x=>[alert,...x].slice(0,20)); setUnseen(x=>x+1);
-        playTone(620,.09,'square',.018);
-      }
-    },3500);
-    return ()=>clearInterval(timer);
-  },[live]);
+  const logout = useCallback((msg = '') => {
+    try { sessionStorage.removeItem(SESSION); } catch { /* ignore */ }
+    setLogged(false);
+    setNotice(msg);
+  }, []);
 
-  const nav=[
-    ["overview","Overview",LayoutDashboard],["alerts","Alerts",AlertTriangle],["incidents","Incidents",Network],
-    ["users","User Behavior",BrainCircuit],["hosts","Hosts",Server],["rules","Detection Rules",ShieldCheck],["pipeline","Architecture",Radar]
-  ];
-  const title=nav.find(x=>x[0]===tab)?.[1]||"Overview";
+  const endSplash = useCallback(() => {
+    try { sessionStorage.setItem('cyberdna-splash', '1'); } catch { /* ignore */ }
+    setSplash(false);
+  }, []);
 
-  if(!started) return <div className={`startup-screen ${booting?"booting":""} bg-${settings.background}`} style={settings.customBackground?{backgroundImage:`linear-gradient(rgba(4,12,17,.70),rgba(4,12,17,.80)),url(${settings.customBackground})`,backgroundPosition:settings.backgroundPosition||'center'}:undefined}>
-    <div className="flag-glow"/>
-    <div className="startup-grid"/>
-    <div className="startup-content">
-      <div className="startup-logo-wrap">
-        <div className="startup-ring ring-one"/>
-        <div className="startup-ring ring-two"/>
-        <div className="startup-logo"><ShieldCheck size={58}/><span>CD</span></div>
-      </div>
-      <div className="startup-kicker">ACTIVE DIRECTORY SECURITY PLATFORM</div>
-      <h1>CYBER <span>DNA</span></h1>
-      <p>Intelligent Behavioral Analytics &amp; Threat Detection</p>
-      <div className="startup-status"><i/>{booting?"INITIALIZING SECURITY ENGINE...":hasLogin?"AUTHENTICATION REQUIRED • CORP.LOCAL":"FIRST ACCESS • CREATE SECURITY PIN"}</div>
-      <div className="login-form">
+  // Session timeout: sign out after the configured period without activity
+  useEffect(() => {
+    if (!logged) return undefined;
+    let timer;
+    const arm = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => logout('You were signed out due to inactivity.'), settings.timeout * 60 * 1000);
+    };
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart'];
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
+    arm();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, arm));
+    };
+  }, [logged, settings.timeout, logout]);
 
-  <div className="login-field">
-    <div className="login-field-label">
-      <User size={14} />
-      <span>USERNAME</span>
-    </div>
+  if (splash) return <Splash onDone={endSplash} reduced={settings.reduce} />;
+  if (!logged) return <Login onLogin={login} theme={settings.theme} toggleTheme={() => {
+    const idx = THEME_CYCLE.indexOf(settings.theme);
+    update('theme', THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
+  }} notice={notice} />;
 
-    <input
-      className="startup-login-input"
-      type="text"
-      value={username}
-      onChange={(e) => {
-        setUsername(e.target.value);
-        setLoginError('');
-      }}
-      placeholder="Enter username"
-      autoComplete="username"
-      disabled={booting}
-    />
-  </div>
-
-  <div className="login-field">
-    <div className="login-field-label">
-      <LockKeyhole size={14} />
-      <span>PASSWORD</span>
-    </div>
-
-    <div className="password-wrapper">
-      <input
-        className="startup-login-input"
-        type={showPassword ? "text" : "password"}
-        value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-          setLoginError('');
-        }}
-        placeholder="Enter password"
-        autoComplete="current-password"
-        disabled={booting}
-      />
-
-      <button
-        type="button"
-        className="password-toggle"
-        onClick={() => setShowPassword(!showPassword)}
-        disabled={booting}
-      >
-        {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-      </button>
-    </div>
-  </div>
-
-  {loginError && (
-    <div className="login-error">
-      {loginError}
-    </div>
-  )}
-
-</div>
-      <button className="start-button" onClick={startSystem} disabled={booting}>
-        <span className="start-icon">{booting?<RefreshCw size={20} className="spin"/>:<Play size={20}/>}</span>
-        <span>{booting?"STARTING SYSTEM":"AUTHENTICATE & START"}</span>
-        <ChevronRight size={18}/>
-      </button>
-      <div className="startup-meta"><span>AD THREAT ANALYTICS</span><span>•</span><span>v1.0 LAB</span><span>•</span><span>SECURE CONSOLE</span></div>
-    </div>
-    <div className="startup-corner top-left">SECURITY CONSOLE // 01</div>
-    <div className="startup-corner bottom-right">MONITORING READY</div>
-  </div>;
-
-  const rootClasses=`app theme-${settings.theme} font-${settings.fontSize} ${settings.fontScope==='page'?'font-page':''} ${settings.enhancedContrast?'enhanced-contrast':''} ${settings.focusGlow?'focus-glow':''} ${settings.compact?'compact-view':''} ${settings.reduceMotion?'reduce-motion':''} bg-${settings.background}`;
-  const bgStyle=settings.customBackground?{backgroundImage:`linear-gradient(rgba(5,14,20,.88),rgba(5,14,20,.92)),url(${settings.customBackground})`,backgroundPosition:settings.backgroundPosition||'center'}:{ };
-  const finalStyle={...bgStyle,'--sidebar-width':`${sidebarWidth}px`,'--ui-font':fontStacks[settings.fontFamily]||fontStacks.inter};
-  return <div className={rootClasses} style={finalStyle}>
-    <aside className="sidebar">
-  <div className="brand">
-    <div className="brand-mark">
-      <ShieldCheck size={23} />
-    </div>
-    <div>
-      <strong>
-        CYBER <em>DNA</em>
-      </strong>
-      <span>AD THREAT ANALYTICS</span>
-    </div>
-  </div>
-
-  <div className="env">
-    <span>
-      <i /> LAB ENVIRONMENT
-    </span>
-    <small>DOMAIN: CORP.LOCAL</small>
-  </div>
-
-  <nav>
-    {nav.map(([id, label, Icon]) => (
-      <button
-        key={id}
-        className={tab === id ? "nav active" : "nav"}
-        onClick={() => navigate(id)}
-      >
-        <Icon size={18} />
-        <span>{label}</span>
-        {id === "alerts" && <b>{unseen}</b>}
-      </button>
-    ))}
-  </nav>
-
-  <div className="sidebar-bottom">
-    <button
-      className="settings-nav"
-      onClick={() => setSettingsOpen(true)}
-    >
-      <Settings2 size={15} />
-      <span>Settings</span>
-      <ChevronRight size={13} />
-    </button>
-  </div>
-</aside>
-
-    <main className="main">
-      <header className="topbar">
-        <div><span className="eyebrow">{title}</span></div>
-        <button
-          className="logout-button"
-          onClick={logout}
-          title="Log out"
-        >
-          <LogOut size={17} />
-          <span>Logout</span>
-        </button>
-      </header>
-      <div className="content">
-        {tab==="overview"&&<Overview events={events} alerts={alerts} setSelectedAlert={setSelectedAlert}/>}
-        {tab==="alerts"&&<Alerts alerts={alerts} setSelectedAlert={setSelectedAlert}/>}
-        {tab==="incidents"&&<Incidents setSelectedIncident={setSelectedIncident}/>}
-        {tab==="users"&&<UsersTab setSelectedUser={setSelectedUser}/>}
-        {tab==="hosts"&&<Hosts/>}
-        {tab==="rules"&&<Rules/>}
-        {tab==="pipeline"&&<Pipeline/>}
-      </div>
-    </main>
-
-    {selectedAlert&&<Modal title="Alert investigation" icon={AlertTriangle} onClose={()=>setSelectedAlert(null)}>
-      <div className="modal-risk"><Badge severity={selectedAlert.severity}/><strong>{selectedAlert.rule}</strong><span>Risk score <b>{selectedAlert.score}/100</b></span></div>
-      <p className="modal-detail">{selectedAlert.detail}</p><div className="evidence-grid">{[["User",selectedAlert.user],["Host",selectedAlert.host],["Source IP",selectedAlert.ip],["Time",selectedAlert.time],["Event source",selectedAlert.source],["Alert ID",selectedAlert.id]].map(x=><div key={x[0]}><span>{x[0]}</span><b>{x[1]}</b></div>)}</div>
-      <div className="explain"><BrainCircuit size={18}/><div><strong>Why was this detected?</strong><p>{selectedAlert.explanation}</p></div></div>
-    </Modal>}
-    {selectedUser&&<Modal title="User behavior profile" icon={BrainCircuit} onClose={()=>setSelectedUser(null)}>
-      <div className="profile"><div className="big-avatar"><UserRound size={28}/></div><div><h2>{selectedUser.name}</h2><span>{selectedUser.dept} • {selectedUser.status}</span></div><div className="profile-score"><b>{selectedUser.score}</b><span>risk score</span></div></div>
-      <div className="explain"><Gauge size={18}/><div><strong>Behavior summary</strong><p>The model currently sees <b>{selectedUser.signal.toLowerCase()}</b> as the main unusual signal. This is an analytical indicator, not automatic proof of compromise.</p></div></div>
-      <div className="mini-stats"><div><span>Normal hosts</span><b>6</b></div><div><span>Login window</span><b>08:00–18:00</b></div><div><span>Recent anomalies</span><b>4</b></div></div>
-    </Modal>}
-    {selectedIncident&&<Modal title="Incident investigation" icon={Network} onClose={()=>setSelectedIncident(null)}>
-      <div className="incident-modal-head"><Badge severity={selectedIncident.risk}/><strong>{selectedIncident.title}</strong><span>{selectedIncident.score}/100</span></div>
-      <div className="timeline">{selectedIncident.chain.map((x,i)=><div key={x}><span>{i+1}</span><div><b>{x}</b><small>Correlated activity detected in the same investigation window.</small></div></div>)}</div>
-      <div className="explain"><Eye size={18}/><div><strong>Investigation view</strong><p>Start from the first event, inspect affected users and hosts, then verify the evidence in Windows Event Viewer or your collected logs before taking action.</p></div></div>
-    </Modal>}
-    {settingsOpen&&<SettingsPanel settings={settings} setSettings={setSettings} onClose={()=>setSettingsOpen(false)} playTone={playTone} onChangePin={(next)=>{try{localStorage.setItem('cyberDNAPin',next);localStorage.setItem('cyberDNAHasLogin','1')}catch{};setPin(next);setHasLogin(true);}}/>}
-  </div>;
-}
-
-function Modal({title,icon:Icon,onClose,children}) {
-  return <div className="modal-backdrop" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><span><Icon size={18}/>{title}</span><button onClick={onClose}><X size={18}/></button></div>{children}</div></div>;
+  return (
+    <DataProvider range={settings.range} autoRefresh={settings.refresh}>
+      <Shell settings={settings} update={update} onLogout={logout} />
+    </DataProvider>
+  );
 }

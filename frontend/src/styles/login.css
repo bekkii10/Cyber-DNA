@@ -1,0 +1,427 @@
+.login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: var(--sp-6) var(--sp-4); background: radial-gradient(70% 60% at 15% 0%, rgba(59,107,240,.18), transparent 60%), radial-gradient(60% 50% at 100% 100%, rgba(91,63,209,.16), transparent 60%), var(--bg); position: relative; }
+.login-theme { position: absolute; top: 1rem; right: 1rem; }
+.login-card { width: 100%; max-width: 62rem; display: grid; grid-template-columns: 1.05fr 1fr; background: var(--surface); border: 1px solid var(--border); border-radius: 1.1rem; box-shadow: var(--shadow-pop); overflow: hidden; animation: fadeUp .4s ease both; }
+.login-left { background: linear-gradient(160deg, #0a1b45 0%, #14307a 60%, #3a2f9a 130%); color: #fff; padding: 2.5rem; display: flex; flex-direction: column; gap: var(--sp-4); }
+.login-left .brand { padding: 0 0 1rem; cursor: pointer; }
+.login-left .eyebrow { font-size: .75rem; letter-spacing: .14em; color: #a9bdf0; font-weight: 700; }
+.login-left h1 { font-size: 2.125rem; line-height: 1.15; letter-spacing: -.02em; }
+.login-left > p { color: #cbd7f6; font-size: 1rem; max-width: 26rem; }
+.login-points { margin-top: auto; display: grid; gap: .85rem; }
+.login-points div { display: grid; grid-template-columns: 2.2rem 1fr; gap: 0 .8rem; align-items: center; }
+.login-points svg { grid-row: span 2; width: 2.2rem; height: 2.2rem; padding: .5rem; border-radius: .6rem; background: rgba(255,255,255,.12); color: #fff; }
+.login-points b { font-size: .875rem; } .login-points small { color: #b4c4ee; font-size: .8125rem; }
+.login-form { padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; background: var(--surface); color: var(--text); }
+.login-form .brand { display: none; color: var(--text); padding: 0 0 1rem; } .login-form .brand small { color: var(--muted); }
+.login-form h2 { font-size: 1.5rem; letter-spacing: -.015em; }
+.login-form .lead { color: var(--text-2); margin: .35rem 0 1.25rem; }
+.login-form label.fld { display: grid; gap: .4rem; font-weight: 600; font-size: .875rem; color: var(--text); margin-bottom: 1rem; }
+.pw { position: relative; }
+.pw input { padding-right: 3rem; }
+.pw button { position: absolute; right: .3rem; top: 50%; transform: translateY(-50%); width: 2.2rem; height: 2.2rem; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-2); display: grid; place-items: center; }
+.pw button:hover { background: var(--surface-3); color: var(--text); }
+.remember { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.remember label { display: inline-flex; align-items: center; gap: .5rem; font-size: .875rem; color: var(--text-2); cursor: pointer; }
+.login-form .btn-primary { width: 100%; min-height: 2.9rem; font-size: .9375rem; }
+.or { display: flex; align-items: center; gap: .75rem; color: var(--muted); margin: 1rem 0; font-size: .8125rem; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.login-form .btn-secondary { width: 100%; min-height: 2.9rem; }
+.g-mark { font-weight: 800; color: #4285f4; }
+.switch { text-align: center; margin-top: 1.25rem; color: var(--text-2); }
+.switch button { background: none; border: 0; color: var(--primary); font-weight: 700; padding: 0 .2rem; }
+.switch button:hover { text-decoration: underline; }
+.login-form .link-btn { padding: .2rem .3rem; }
+@media (max-width: 860px) {
+  .login-card { grid-template-columns: 1fr; max-width: 30rem; }
+  .login-left { display: none; }
+  .login-form { padding: 1.75rem 1.4rem; }
+  .login-form .brand { display: flex; }
+}
+/* ============ CYBER DNA THEME OVERRIDES ============ */
+:root[data-theme="cyberdna"] .login-left {
+  background: var(--login-left-bg);
+  background-image: linear-gradient(160deg, #0a0a0a 0%, #111111 100%);
+  border-right: 1px solid var(--border);
+}
+
+:root[data-theme="cyberdna"] .login-left .eyebrow {
+  color: var(--primary);
+}
+
+:root[data-theme="cyberdna"] .login-left h1 {
+  color: var(--text);
+}
+
+:root[data-theme="cyberdna"] .login-left > p {
+  color: var(--text-2);
+}
+
+:root[data-theme="cyberdna"] .login-points svg {
+  color: var(--primary);
+  background: var(--login-icon-bg);
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+}
+
+:root[data-theme="cyberdna"] .login-points b {
+  color: var(--text);
+}
+
+:root[data-theme="cyberdna"] .login-points small {
+  color: var(--muted);
+}
+
+:root[data-theme="cyberdna"] .brand-mark {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+:root[data-theme="cyberdna"] .switch button {
+  color: var(--primary);
+}
+
+:root[data-theme="cyberdna"] .login-form {
+  background: var(--surface);
+}
+
+:root[data-theme="cyberdna"] .login-form h2 {
+  color: var(--text);
+}
+
+:root[data-theme="cyberdna"] .login-form .lead {
+  color: var(--text-2);
+}
+/* ============================================================
+   CYBER DNA — Premium login theme
+   ============================================================ */
+:root[data-theme="cyberdna"] .login {
+  background-color: var(--login-bg);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255,69,0,0.08), transparent 60%),
+    linear-gradient(rgba(255,69,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,69,0,0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 50px 50px, 50px 50px;
+}
+
+/* --- Card shell --- */
+:root[data-theme="cyberdna"] .login-card {
+  background: var(--login-left-bg);
+  border: 1px solid #1a1a1a;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,69,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* --- LEFT PANEL — the brand side --- */
+:root[data-theme="cyberdna"] .login-left {
+  position: relative;
+  background:
+    linear-gradient(160deg, #0a0a0a 0%, #111111 100%);
+  border-right: 1px solid #1a1a1a;
+  overflow: hidden;
+}
+
+/* Orange accent bar on the right edge of the left panel */
+:root[data-theme="cyberdna"] .login-left::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 15%;
+  bottom: 15%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, #FF4500, transparent);
+  opacity: 0.5;
+}
+
+/* Faint scanline glow at the bottom of the left panel */
+:root[data-theme="cyberdna"] .login-left::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40%;
+  background: radial-gradient(ellipse at 0% 100%, rgba(255,69,0,0.15), transparent 70%);
+  pointer-events: none;
+}
+
+/* Subtitle "ACTIVE DIRECTORY SECURITY" */
+:root[data-theme="cyberdna"] .login-left .eyebrow {
+  color: #FF4500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* The "Welcome back." headline */
+:root[data-theme="cyberdna"] .login-left h1 {
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+:root[data-theme="cyberdna"] .login-left > p {
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+/* Feature list items */
+:root[data-theme="cyberdna"] .login-points > div {
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+:root[data-theme="cyberdna"] .login-points > div:hover {
+  background: rgba(255,69,0,0.06);
+}
+
+:root[data-theme="cyberdna"] .login-points svg {
+  color: #FF4500;
+  background: rgba(255,69,0,0.10);
+  border: 1px solid rgba(255,69,0,0.25);
+  padding: 0.45rem;
+  border-radius: 8px;
+  width: 2.2rem;
+  height: 2.2rem;
+  box-shadow: 0 0 12px rgba(255,69,0,0.15);
+}
+
+:root[data-theme="cyberdna"] .login-points b {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+:root[data-theme="cyberdna"] .login-points small {
+  color: #888888;
+}
+
+/* --- RIGHT PANEL — the form side --- */
+:root[data-theme="cyberdna"] .login-form {
+  background: #0d0d0d;
+  padding: 2.75rem;
+}
+
+:root[data-theme="cyberdna"] .login-form h2 {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+:root[data-theme="cyberdna"] .login-form .lead {
+  color: #888888;
+  font-size: 0.9rem;
+}
+
+/* Form field labels — uppercase, orange, monospace */
+:root[data-theme="cyberdna"] .login-form label.fld {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #FF4500;
+}
+
+/* The cream input boxes */
+:root[data-theme="cyberdna"] .login-form input {
+  background: #FFF8E7;
+  color: #050505;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+:root[data-theme="cyberdna"] .login-form input::placeholder {
+  color: #777;
+}
+
+:root[data-theme="cyberdna"] .login-form input:focus {
+  outline: none;
+  border-color: #FF4500;
+  box-shadow: 0 0 0 4px rgba(255,69,0,0.20), 0 0 20px rgba(255,69,0,0.25);
+  background: #FFFBF0;
+}
+
+/* Password reveal button */
+:root[data-theme="cyberdna"] .pw button {
+  color: #666;
+  background: transparent;
+}
+
+:root[data-theme="cyberdna"] .pw button:hover {
+  background: rgba(0,0,0,0.06);
+  color: #050505;
+}
+
+/* Remember-me + Forgot link row */
+:root[data-theme="cyberdna"] .remember {
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}
+
+:root[data-theme="cyberdna"] .remember input[type="checkbox"] {
+  accent-color: #FF4500;
+}
+
+:root[data-theme="cyberdna"] .remember .link-btn {
+  color: #FF4500;
+  font-weight: 500;
+}
+
+:root[data-theme="cyberdna"] .remember .link-btn:hover {
+  color: #ff6a33;
+  text-decoration: underline;
+}
+
+/* --- Primary CTA — the big orange button --- */
+:root[data-theme="cyberdna"] .login-form .btn-primary {
+  background: linear-gradient(135deg, #FF4500 0%, #ff6a33 100%);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  padding: 0.95rem 1rem;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(255,69,0,0.30);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+:root[data-theme="cyberdna"] .login-form .btn-primary:hover {
+  background: linear-gradient(135deg, #ff5a1a 0%, #ff7d44 100%);
+  box-shadow: 0 8px 30px rgba(255,69,0,0.55);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="cyberdna"] .login-form .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(255,69,0,0.35);
+}
+
+/* --- OR divider --- */
+:root[data-theme="cyberdna"] .or {
+  color: #555;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+:root[data-theme="cyberdna"] .or::before,
+:root[data-theme="cyberdna"] .or::after {
+  background: #222;
+}
+
+/* --- Secondary CTA (Google) --- */
+:root[data-theme="cyberdna"] .login-form .btn-secondary {
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #e5e5e5;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+:root[data-theme="cyberdna"] .login-form .btn-secondary:hover {
+  background: #141414;
+  border-color: #3a3a3a;
+}
+
+:root[data-theme="cyberdna"] .g-mark {
+  color: #4285f4;
+}
+
+/* --- Switch text: "Don't have an account? Sign up" --- */
+:root[data-theme="cyberdna"] .switch {
+  color: #888888;
+  font-size: 0.85rem;
+}
+
+:root[data-theme="cyberdna"] .switch button {
+  color: #FF4500;
+  font-weight: 600;
+}
+
+:root[data-theme="cyberdna"] .switch button:hover {
+  color: #ff6a33;
+  text-decoration: underline;
+}
+
+/* --- Brand mark circle --- */
+:root[data-theme="cyberdna"] .brand-mark {
+  background: linear-gradient(145deg, #FF4500 0%, #ff6a33 100%);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255,69,0,0.35);
+}
+
+:root[data-theme="cyberdna"] .brand b {
+  color: #ffffff;
+}
+
+:root[data-theme="cyberdna"] .brand small {
+  color: #888888;
+}
+
+/* --- Form error/status notes --- */
+:root[data-theme="cyberdna"] .form-note.err {
+  background: rgba(240,68,56,0.12);
+  border: 1px solid rgba(240,68,56,0.35);
+  color: #ffaaa3;
+}
+
+:root[data-theme="cyberdna"] .form-note.info {
+  background: rgba(255,69,0,0.10);
+  border: 1px solid rgba(255,69,0,0.30);
+  color: #FF4500;
+}
+:root[data-theme="cyberdna"] .login-left .brand-mark {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 12px;
+  font-size: 1.4rem;
+}
+
+:root[data-theme="cyberdna"] .login-left .brand b {
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+}
+
+:root[data-theme="cyberdna"] .login-left .brand small {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+:root[data-theme="cyberdna"] .secure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255,69,0,0.08);
+  border: 1px solid rgba(255,69,0,0.25);
+  border-radius: 999px;
+  color: #FF4500;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  align-self: flex-start;
+}
+
+:root[data-theme="cyberdna"] .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FF4500;
+  box-shadow: 0 0 0 0 rgba(255,69,0,0.6);
+  animation: secure-pulse 1.8s infinite;
+}
+
+@keyframes secure-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255,69,0,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(255,69,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,69,0,0); }
+}
