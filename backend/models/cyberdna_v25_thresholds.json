@@ -1,0 +1,39 @@
+{
+  "model_score_p99": 0.10532385168133324,
+  "model_score_p995": 0.1226613500301712,
+  "increase_score_p995": 0.6601691370620053,
+  "decrease_score_p995": 0.6705142140817397,
+  "calibration_hours": [
+    8,
+    9
+  ],
+  "training_hours": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "test_hours": [
+    10,
+    11,
+    12
+  ],
+  "feature_names": [
+    "successful_logons",
+    "failed_logons",
+    "logoffs",
+    "explicit_credential_events",
+    "privilege_events",
+    "process_starts",
+    "kerberos_tgt_events",
+    "kerberos_service_ticket_events",
+    "credential_validation_events"
+  ],
+  "excluded_features": {
+    "process_ends": "Excluded pending data-quality validation"
+  },
+  "score_meaning": "Anomaly score, not attack probability or proof of compromise"
+}

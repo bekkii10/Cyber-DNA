@@ -72,8 +72,11 @@ class AlertBase(BaseModel):
     time: datetime
     detail: Optional[str] = None
     source: Optional[str] = None
+    detection_source: Optional[str] = None
+    rule_id: Optional[str] = None
     explanation: Optional[str] = None
     seen: bool = False
+    status: str = "new"
 
 class AlertResponse(AlertBase):
     id: str
@@ -84,6 +87,9 @@ class AlertResponse(AlertBase):
 
 class AlertSeenUpdate(BaseModel):
     seen: bool
+
+class AlertStatusUpdate(BaseModel):
+    status: str
 
 class AlertMarkAllSeenResponse(BaseModel):
     updated: int
@@ -116,6 +122,7 @@ class UserResponse(BaseModel):
     department: Optional[str] = None
     status: str
     risk_score: float
+    last_seen: Optional[datetime] = None
     baseline: Dict[str, Any] = {}
     recent_anomalies: List[Any] = []
     recent_events: List[Any] = []
@@ -128,6 +135,11 @@ class ComputerResponse(BaseModel):
     hostname: str
     status: str
     risk_score: float
+    ip: Optional[str] = None
+    os: Optional[str] = None
+    last_seen: Optional[datetime] = None
+    event_count: int = 0
+    role: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -163,3 +175,29 @@ class CorrelationResponse(BaseModel):
     status: str
     incidents_created: int
     incidents_updated: int
+
+
+class AnalystRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+    history: List[Dict[str, str]] = []
+    context: Optional[Dict[str, Any]] = None
+
+class AnalystResponse(BaseModel):
+    configured: bool
+    provider: str
+    model: Optional[str] = None
+    reply: str
+    sections: Dict[str, Any] = {}
+    evidence: List[Dict[str, Any]] = []
+    sources: List[Dict[str, Any]] = []
+    provider_status: Optional[str] = None
+    error_code: Optional[str] = None
+
+class MLStatus(BaseModel):
+    enabled: bool
+    available: bool
+    model: Optional[str] = None
+    model_version: Optional[str] = None
+    feature_names: List[str] = []
+    compatibility: str
+    warning: Optional[str] = None

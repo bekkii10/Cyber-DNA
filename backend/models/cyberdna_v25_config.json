@@ -1,0 +1,65 @@
+{
+  "features": [
+    "successful_logons",
+    "failed_logons",
+    "logoffs",
+    "explicit_credential_events",
+    "privilege_events",
+    "process_starts",
+    "kerberos_tgt_events",
+    "kerberos_service_ticket_events",
+    "credential_validation_events"
+  ],
+  "scales": {
+    "successful_logons": 3.4339872044851463,
+    "failed_logons": 0.1,
+    "logoffs": 3.4339872044851463,
+    "explicit_credential_events": 1.0986122886681096,
+    "privilege_events": 1.0986122886681096,
+    "process_starts": 3.367295829986474,
+    "kerberos_tgt_events": 1.6094379124341003,
+    "kerberos_service_ticket_events": 2.639057329615259,
+    "credential_validation_events": 1.9459101490553132
+  },
+  "thresholds": {
+    "model_score_p99": 0.10532385168133324,
+    "model_score_p995": 0.1226613500301712,
+    "increase_score_p995": 0.6601691370620053,
+    "decrease_score_p995": 0.6705142140817397,
+    "calibration_hours": [
+      8,
+      9
+    ],
+    "training_hours": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "test_hours": [
+      10,
+      11,
+      12
+    ],
+    "feature_names": [
+      "successful_logons",
+      "failed_logons",
+      "logoffs",
+      "explicit_credential_events",
+      "privilege_events",
+      "process_starts",
+      "kerberos_tgt_events",
+      "kerberos_service_ticket_events",
+      "credential_validation_events"
+    ],
+    "excluded_features": {
+      "process_ends": "Excluded pending data-quality validation"
+    },
+    "score_meaning": "Anomaly score, not attack probability or proof of compromise"
+  },
+  "random_state": 2026,
+  "n_estimators": 300
+}

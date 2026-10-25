@@ -1,11 +1,22 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from app.schemas import ComputerResponse, EventResponse, AlertResponse
 from app.db.database import get_db
 from app.db.models import Computer, Event, Alert
 
 router = APIRouter()
+
+
+def _serialize_host(host: Computer, db: Session) -> dict:
+    event_count = db.query(func.count(Event.id)).filter(Event.computer_id == host.id).scalar() or 0
+    return {
+        "hostname": host.hostname, "status": host.status, "risk_score": host.risk_score or 0,
+        "ip": host.ip_address, "os": None, "last_seen": host.last_seen,
+        "event_count": int(event_count), "role": None,
+    }
+
 
 @router.get("/hosts", response_model=List[ComputerResponse])
 def get_computers(
@@ -26,14 +37,14 @@ def get_computers(
         
     offset = (page - 1) * limit
     hosts = query.offset(offset).limit(limit).all()
-    return hosts
+    return [_serialize_host(host, db) for host in hosts]
 
 @router.get("/hosts/{hostname}", response_model=ComputerResponse)
 def get_computer(hostname: str, db: Session = Depends(get_db)):
     host = db.query(Computer).filter(Computer.hostname == hostname).first()
     if not host:
         raise HTTPException(status_code=404, detail="Computer not found")
-    return host
+    return _serialize_host(host, db)
 
 @router.get("/hosts/{hostname}/events", response_model=List[EventResponse])
 def get_computer_events(hostname: str, db: Session = Depends(get_db)):

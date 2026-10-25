@@ -36,16 +36,16 @@ check_url() {
     fi
 }
 
-check_url "GET" "/api/health" ""
-check_url "GET" "/api/dashboard/overview" ""
-check_url "GET" "/api/collector/status" ""
+check_url "GET" "/api/v1/health" ""
+check_url "GET" "/api/v1/dashboard/overview" ""
+check_url "GET" "/api/v1/collector/status" ""
 
 PAYLOAD='{"timestamp":"2026-10-04T06:40:12Z","event_id":4625,"username":"sifen.melaku","domain":"corp.local","logon_type":3,"source_ip":"192.168.56.102","computer":"WIN-CLIENT01","record_id":12015,"result":"FAILURE","action":"Failed logon","event_details":{}}'
-check_url "POST" "/api/collector/events" "$PAYLOAD"
+check_url "POST" "/api/v1/collector/events" "$PAYLOAD"
 
-check_url "GET" "/api/events" ""
-check_url "GET" "/api/alerts" ""
-check_url "GET" "/api/incidents" ""
-check_url "GET" "/api/users" ""
-check_url "GET" "/api/hosts" ""
+check_url "GET" "/api/v1/events" ""
+check_url "GET" "/api/v1/alerts" ""
+check_url "GET" "/api/v1/incidents" ""
+check_url "GET" "/api/v1/users" ""
+check_url "GET" "/api/v1/hosts" ""
 

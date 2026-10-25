@@ -1,4 +1,6 @@
 import json
+import os
+import sys
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal, engine, Base
@@ -162,4 +164,7 @@ def seed_data():
     print("Database successfully seeded with realistic test data!")
 
 if __name__ == "__main__":
+    if os.getenv("CYBERDNA_ALLOW_DEMO_SEED", "").lower() != "true":
+        print("This script inserts fictional DEMO data. To run intentionally, set CYBERDNA_ALLOW_DEMO_SEED=true.")
+        sys.exit(2)
     seed_data()

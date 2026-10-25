@@ -2,17 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="theme-color" content="#0a1b45" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f4fd8'/%3E%3Cpath d='M16 6l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V9z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E" />
     <title>Cyber DNA — AD Threat Analytics</title>
+    <script>
+      // Apply saved theme before first paint to avoid a flash of the wrong theme.
+      try {
+        var s = JSON.parse(localStorage.getItem('cyberdna-settings') || '{}');
+        var d = document.documentElement;
+        d.dataset.theme = s.theme || 'light';
+        d.dataset.font = s.font || 'normal';
+        d.dataset.motion = s.reduce ? 'reduced' : 'full';
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
