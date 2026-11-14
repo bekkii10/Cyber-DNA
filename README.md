@@ -6,6 +6,18 @@ to login use: username - admin@corp
 ## Development of an Intelligent Behavioral Analytics and Threat Detection Platform for Active Directory Environments
 Video link: https://drive.google.com/file/d/1DS8Zd-dPxj_GaiiXDy5kf8zg43YB6AC_/view?usp=sharing
 
+
+## 🎥 Individual Project Presentation
+
+**Presenter:** Bereket Mamo Weldetsadik
+
+**Duration:** 5 Minutes
+
+**Video Presentation:**
+
+[▶ Watch Bereket Mamo Weldetsadik's Presentation](https://drive.google.com/file/d/106FGeKS2MPqUVAldyzjfuTM5ammjFV3t/view?usp=drivesdk)
+
+
 ## 1. Project overview
 
 Cyber DNA is a security monitoring and investigation platform focused on
