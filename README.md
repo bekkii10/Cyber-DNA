@@ -4,6 +4,7 @@ to login use: username - admin@corp
               password - 203040kl0978
 
 ## Development of an Intelligent Behavioral Analytics and Threat Detection Platform for Active Directory Environments
+General project presentation
 Video link: https://drive.google.com/file/d/1DS8Zd-dPxj_GaiiXDy5kf8zg43YB6AC_/view?usp=sharing
 
 
